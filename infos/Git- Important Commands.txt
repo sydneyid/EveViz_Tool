@@ -1,0 +1,62 @@
+1. Cloning current Project (only once needed)
+	cd absolut path (folder you want it to be saved in)
+	git clone http...
+
+2. Go to the right folder (eventvisualization)
+	cd absolut path
+
+3. Find all branches from Project
+	git fetch
+
+4. See all existing branches 
+	git branch -a
+
+5. Go to certain branch
+	git checkout branchname
+
+6. If creating new Branch
+	go to main -> git checkout main
+	create local new branch -> git checkout -b newbranchname
+
+7. One you are at the branch, you can modify the files in cloned eventvisualization folder
+
+8. Once changes are finish
+	add all changes -> git add. 
+	commit your changes -> git commit -m "Message"
+
+9. Pushing changes to Gitlab 
+	git push (if the branch already exists on GitLab)
+	git push -u origin newbranchname
+
+10. For pulling changes
+	Go to the branch of interest -> git checkout branchname
+	Pull changes -> git pull
+
+11. For getting newest version of main in current branch 
+	git fetch origin                # get the newest info from the remote
+	git checkout main               # switch to main
+	git pull origin main            # update local main
+	git checkout -                  # go back to your branch
+	git rebase main
+
+12. For Discarding Changes that you made on your local device (e.g. to be able to pull)
+	git reset			(first try)
+	git reset --hard	(works for sure)
+
+
+
+Additional Infos
+
+13. For checking current state
+	git status
+
+14. To clean up shown old branches show at git branch -a
+	git fetch --prune
+
+15. To delete local branches 
+	git branch -D branchname
+
+
+
+
+	

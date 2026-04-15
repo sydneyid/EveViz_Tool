@@ -1,0 +1,14 @@
+numpy
+numba
+matplotlib
+pandas
+h5py
+pyarrow
+Pillow
+
+#Filters:
+
+#Hdf5: https://github.com/prophesee-ai/hdf5_ecf
+
+#openEB: https://github.com/prophesee-ai/openeb
+

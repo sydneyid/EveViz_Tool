@@ -255,10 +255,22 @@ Represent the event stream in adjustable time bins to inspect local event densit
 ---
 
 ## Authors
+The original authors of EveViz are: 
 Helena Niethammer: helena.niethammer0105@gmail.com
 Luca Illig: luca3.illig@gmail.com
 Pablo Broders: broderspablo@gmail.com
 Yael Kaliner: yaelkaliner@gmail.com
+
+Ongoing maintenance of the tool is done by Dr. Sydney Dolan.
+
+## Citation
+If you found the tool helpful in your work, we ask you use the following bibtex citation!
+```bibtex
+@article{EveViz2026,
+  title={EveViz - Visualization Toolkit for Astronomical Event Data},
+  author={Kaliner, Yael and Illig, Luca and Broders, Pablo and Niethammer, Helena},
+  year={2026}
+}
 
 ## Acknowledgment
 Many thanks to the continued support and supervision of Dr. Sydney Dolan and Lara Illig for designing our projects logo.

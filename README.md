@@ -271,6 +271,6 @@ If you found the tool helpful in your work, we ask you use the following bibtex 
   author={Kaliner, Yael and Illig, Luca and Broders, Pablo and Niethammer, Helena},
   year={2026}
 }
-
+```
 ## Acknowledgment
 Many thanks to the continued support and supervision of Dr. Sydney Dolan and Lara Illig for designing our projects logo.

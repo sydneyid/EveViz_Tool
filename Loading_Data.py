@@ -13,9 +13,56 @@ try:
     from metavision_core.event_io import EventsIterator
 except ModuleNotFoundError:
     print("Could not import metavision_core.event_io")
+    
+    
+
 
 
 class LoadingData:
+
+    BIN_CONVERTER_EXE = "Main.exe"
+    # Optional full path or folder — use if Main.exe is not on the PATH EveViz inherits.
+    BIN_CONVERTER_ENV_VARS = ("EVEVIZ_MAIN_EXE", "EVEVIZ_BIN_CONVERTER", "BIN_CONVERTER_PATH")
+
+    @staticmethod
+    def find_bin_converter_path():
+        """
+        Locate Main.exe on this machine (not in the EveViz repo).
+
+        Search order:
+          1. EVEVIZ_MAIN_EXE / EVEVIZ_BIN_CONVERTER / BIN_CONVERTER_PATH (file or folder)
+          2. Directories in the process PATH environment variable (via shutil.which)
+        """
+        try:
+            for env_name in LoadingData.BIN_CONVERTER_ENV_VARS:
+                raw = os.environ.get(env_name, "").strip()
+                if not raw:
+                    continue
+                candidate = Path(os.path.expanduser(raw)).resolve()
+                if candidate.is_file():
+                    return candidate
+                exe_in_dir = candidate / LoadingData.BIN_CONVERTER_EXE
+                if exe_in_dir.is_file():
+                    return exe_in_dir
+
+            # shutil.which walks os.environ["PATH"] (and PATHEXT on Windows).
+            on_path = shutil.which(LoadingData.BIN_CONVERTER_EXE)
+            if on_path:
+                return Path(on_path).resolve()
+        except Exception:
+            return None
+        return None
+
+    @staticmethod
+    def is_bin_converter_available():
+        """Return True if Main.exe was found via env override or system PATH."""
+        return LoadingData.find_bin_converter_path() is not None
+
+    @staticmethod
+    def get_bin_converter_command():
+        """Absolute path to Main.exe for subprocess, or None if not installed."""
+        found = LoadingData.find_bin_converter_path()
+        return str(found) if found is not None else None
 
     @staticmethod
     def GetFilePath_Typ():      #Get file path and type of the data file
@@ -315,43 +362,64 @@ class LoadingData:
         """
          Decompress a .bin file into a .txt file using Main.exe.
          Requires the folder containing Main.exe to be on PATH.
+         EveViz runs without this converter; only .bin load/export need it.
         """
 
         # Validate input file
-        bin_path = Path(bin_path).resolve()
+        try:
+            bin_path = Path(bin_path).resolve()
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid .bin path: {bin_path}") from exc
+
         if not bin_path.is_file():
             raise FileNotFoundError(f"Input file does not exist: {bin_path}")
 
-        # Check that Main.exe is callable via PATH
-        if shutil.which("Main.exe") is None:
-            raise EnvironmentError(
-                "Main.exe is not available on PATH. "
-                "Ensure the folder containing Main.exe is added to PATH."
-                "Necessary to restart VS Code or the system for changes to take effect."
-            )
+        main_exe = LoadingData.get_bin_converter_command()
+        if main_exe is None:
+            raise EnvironmentError(LoadingData.bin_converter_not_found_message())
 
-        # Create output file path
         txt_path = bin_path.with_suffix(".txt")
 
-        # Execute command using executable name only
-        result = subprocess.run(
-            ["Main.exe", "d", str(bin_path), str(txt_path)],
-            capture_output=True,
-            text=True
-        )
+        try:
+            result = subprocess.run(
+                [main_exe, "d", str(bin_path), str(txt_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except FileNotFoundError as exc:
+            raise EnvironmentError(
+                "BIN compression (Main.exe) was not found when decompressing. "
+                "EveViz works without it — install Main.exe only for .bin files."
+            ) from exc
+        except OSError as exc:
+            raise RuntimeError(f"Failed to run {LoadingData.BIN_CONVERTER_EXE}: {exc}") from exc
 
-        # Validate execution
         if result.returncode != 0:
+            stderr = (result.stderr or "").strip()
             raise RuntimeError(
-                f"Main.exe failed:\n{result.stderr.strip()}"
+                f"{LoadingData.BIN_CONVERTER_EXE} failed while decompressing .bin"
+                + (f":\n{stderr}" if stderr else ".")
             )
 
         if not txt_path.is_file():
-            raise RuntimeError("Decompression completed but output file was not created")
+            raise RuntimeError("Decompression completed but output .txt was not created.")
 
-        x, y, t, p = LoadingData.Load_TxtData(txt_path)
+        try:
+            x, y, t, p = LoadingData.Load_TxtData(txt_path)
+        except Exception as exc:
+            raise RuntimeError(f"Decompressed .txt could not be loaded: {exc}") from exc
 
         return x, y, t, p
+
+    @staticmethod
+    def bin_converter_not_found_message():
+        return (
+            "BIN compression (Main.exe) was not found. "
+            "EveViz works without it — use CSV, TXT, HDF5, or RAW. "
+            "To enable .bin files: add the folder containing Main.exe to your system PATH, "
+            "or set EVEVIZ_MAIN_EXE to its full path, then restart EveViz."
+        )
                 
     @staticmethod
     def Load_TxtData(filepath):     #Load TXT data into x,y,t,p arrays

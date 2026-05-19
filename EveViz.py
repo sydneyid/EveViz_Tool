@@ -26,6 +26,21 @@ from Cleaning_Data import CleaningData
 from GUI_helper import setup_time_range_section, reset_for_new_file
 
 
+# Optional BIN converter — EveViz runs fully without Main.exe on PATH.
+try:
+    bin_not_available = not ld.is_bin_converter_available()
+except Exception:
+    bin_not_available = True
+
+def _bin_not_installed_message():
+    return ld.bin_converter_not_found_message()
+
+
+def _bin_installed_hint():
+    found = ld.find_bin_converter_path()
+    if found is None:
+        return _bin_not_installed_message()
+    return f"BIN converter found: {found}"
 
 
 # Application state container to avoid scattered module-level globals
@@ -1897,6 +1912,16 @@ def setup_loading_window(state):
     file_type_display = tk.Entry(loading_frame, textvariable=file_type_var, width=12)
     file_type_display.pack(pady=5)
 
+    bin_hint = tk.Label(
+        loading_frame,
+        text=_bin_installed_hint(),
+        font=("Arial", 9),
+        fg="gray" if bin_not_available else "green",
+        wraplength=420,
+        justify="left",
+    )
+    bin_hint.pack(pady=(0, 6), anchor="w")
+
     def select_loader():
         filepath = file_path_var.get()
         filetype = file_type_var.get()
@@ -1909,6 +1934,9 @@ def setup_loading_window(state):
             elif filetype == "hdf5" or filetype == "h5":
                 state.x_values, state.y_values, state.t_values, state.p_values = ld.Load_Hdf5Data(filepath)
             elif filetype == "bin":
+                if not ld.is_bin_converter_available():
+                    status_label.config(text=_bin_not_installed_message(), fg="red")
+                    return
                 state.x_values, state.y_values, state.t_values, state.p_values = ld.Load_BinData(filepath)
             elif filetype == "txt":
                 state.x_values, state.y_values, state.t_values, state.p_values = ld.Load_TxtData(filepath)

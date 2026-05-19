@@ -9,6 +9,7 @@ from matplotlib import animation
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from GUI_helper import truncate_message
+from Loading_Data import LoadingData
 
 
 class ExportingData:
@@ -439,27 +440,42 @@ class ExportingData:
     def export_bin(state, fpath):
         """
         Export to .bin by first exporting to .txt (in the same folder), then calling Main.exe c txtfile binfile, then deleting the txt.
+        EveViz runs without this converter; export HDF5 or TXT if Main.exe is not installed.
         """
-       
-        # Check Main.exe on PATH
-        if shutil.which("Main.exe") is None:
-            raise EnvironmentError(
-                "Main.exe is not available on PATH. "
-                "Ensure the folder containing Main.exe is added to PATH."
-            )
-        # Create temp txt file in the same directory as the bin file
+
+        main_exe = LoadingData.get_bin_converter_command()
+        if main_exe is None:
+            raise EnvironmentError(LoadingData.bin_converter_not_found_message())
+
         bin_dir = os.path.dirname(fpath)
         base = os.path.splitext(os.path.basename(fpath))[0]
         unique = uuid.uuid4().hex[:8]
         txt_path = os.path.join(bin_dir, f"{base}_tmp_{unique}.txt")
         try:
             ExportingData.export_txt(state, txt_path)
-            # Call Main.exe c txtfile binfile
-            result = subprocess.run([
-                "Main.exe", "c", str(txt_path), str(fpath)
-            ], capture_output=True, text=True)
+            try:
+                result = subprocess.run(
+                    [main_exe, "c", str(txt_path), str(fpath)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+            except FileNotFoundError as exc:
+                raise EnvironmentError(
+                    "BIN compression (Main.exe) was not found during export. "
+                    "Export as HDF5 or TXT, or install Main.exe for .bin export."
+                ) from exc
+            except OSError as exc:
+                raise RuntimeError(
+                    f"Failed to run {LoadingData.BIN_CONVERTER_EXE}: {exc}"
+                ) from exc
+
             if result.returncode != 0:
-                raise RuntimeError(f"Main.exe failed: {result.stderr.strip()}")
+                stderr = (result.stderr or "").strip()
+                raise RuntimeError(
+                    f"{LoadingData.BIN_CONVERTER_EXE} failed during .bin export"
+                    + (f": {stderr}" if stderr else ".")
+                )
         finally:
             if os.path.exists(txt_path):
                 os.remove(txt_path)

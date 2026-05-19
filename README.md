@@ -256,10 +256,10 @@ Represent the event stream in adjustable time bins to inspect local event densit
 
 ## Authors
 The original authors of EveViz are: 
-Helena Niethammer: helena.niethammer0105@gmail.com
-Luca Illig: luca3.illig@gmail.com
-Pablo Broders: broderspablo@gmail.com
-Yael Kaliner: yaelkaliner@gmail.com
+Helena Niethammer: helena.niethammer0105@gmail.com  
+Luca Illig: luca3.illig@gmail.com  
+Pablo Broders: broderspablo@gmail.com  
+Yael Kaliner: yaelkaliner@gmail.com  
 
 Ongoing maintenance of the tool is done by Dr. Sydney Dolan.
 
@@ -272,5 +272,10 @@ If you found the tool helpful in your work, we ask you use the following bibtex 
   year={2026}
 }
 ```
+This code is released on a MIT License. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ## Acknowledgment
 Many thanks to the continued support and supervision of Dr. Sydney Dolan and Lara Illig for designing our projects logo.
